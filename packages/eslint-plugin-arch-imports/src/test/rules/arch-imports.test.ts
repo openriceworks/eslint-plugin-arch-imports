@@ -2,12 +2,12 @@ import archImports from "../../rules/arch-imports";
 import { TSESLint } from "@typescript-eslint/utils";
 
 const ruleTester = new TSESLint.RuleTester({
-  parser: require.resolve('@typescript-eslint/parser'),
+  parser: require.resolve("@typescript-eslint/parser"),
   parserOptions: {
     ecmaVersion: "latest",
     sourceType: "module",
-  }
-})
+  },
+});
 
 ruleTester.run("arch-imports", archImports, {
   valid: [
@@ -19,7 +19,7 @@ ruleTester.run("arch-imports", archImports, {
         {
           importAllowSettingList: [],
           targetFileSuffix: ["", "js", "jsx", "ts", "tsx"],
-        }
+        },
       ],
     },
     // components can use hooks.
@@ -31,14 +31,12 @@ ruleTester.run("arch-imports", archImports, {
           importAllowSettingList: [
             {
               pathPattern: /src\/components\/.+/,
-              importAllowPathList: [
-                /src\/hooks\/.+/
-              ]
-            }
+              importAllowPathList: [/src\/hooks\/.+/],
+            },
           ],
           targetFileSuffix: ["", "js", "jsx", "ts", "tsx"],
-        }
-      ]
+        },
+      ],
     },
     {
       filename: "src/components/my-component.tsx",
@@ -48,14 +46,12 @@ ruleTester.run("arch-imports", archImports, {
           importAllowSettingList: [
             {
               pathPattern: /src\/components\/.+/,
-              importAllowPathList: [
-                /src\/hooks\/.+/
-              ]
-            }
+              importAllowPathList: [/src\/hooks\/.+/],
+            },
           ],
           targetFileSuffix: ["", "js", "jsx", "ts", "tsx"],
-        }
-      ]
+        },
+      ],
     },
   ],
   invalid: [
@@ -67,17 +63,13 @@ ruleTester.run("arch-imports", archImports, {
           importAllowSettingList: [
             {
               pathPattern: /src\/hooks\/.+/,
-              importAllowPathList: [
-                /src\/hooks\/.+/
-              ]
-            }
+              importAllowPathList: [/src\/hooks\/.+/],
+            },
           ],
           targetFileSuffix: ["", "js", "jsx", "ts", "tsx"],
-        }
+        },
       ],
-      errors: [
-        {messageId: "notAllowImport"}
-      ]
-    }
+      errors: [{ messageId: "notAllowImport" }],
+    },
   ],
-})
+});

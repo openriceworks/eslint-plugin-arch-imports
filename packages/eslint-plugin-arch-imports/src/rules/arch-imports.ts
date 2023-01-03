@@ -1,5 +1,5 @@
 import { TSESTree } from "@typescript-eslint/utils";
-import { createRule, getFilePathFromProjectRoot } from "../utils/eslint"
+import { createRule, getFilePathFromProjectRoot } from "../utils/eslint";
 import path from "path";
 
 type ArchImportsOptions = [
@@ -7,19 +7,19 @@ type ArchImportsOptions = [
     importAllowSettingList: ImportAllowSetting[];
     targetFileSuffix: string[];
   }
-]
+];
 
 type ImportAllowSetting = {
-  pathPattern: string|RegExp;
-  importAllowPathList: (string|RegExp)[];
-}
+  pathPattern: string | RegExp;
+  importAllowPathList: (string | RegExp)[];
+};
 
-const matchFilePath = (fileName: string, pathPattern: string | RegExp) => 
-  typeof pathPattern === 'string'
+const matchFilePath = (fileName: string, pathPattern: string | RegExp) =>
+  typeof pathPattern === "string"
     ? pathPattern === fileName
     : pathPattern.test(fileName);
 
-type MessageIds = "notAllowImport"
+type MessageIds = "notAllowImport";
 
 export default createRule<ArchImportsOptions, MessageIds>({
   name: "arch-imports",
@@ -29,59 +29,68 @@ export default createRule<ArchImportsOptions, MessageIds>({
       description: "TODO",
       recommended: false,
     },
-    schema:[
+    schema: [
       {
-        type: 'object',
+        type: "object",
         properties: {
           importAllowSettingList: {
-            type: 'array',
+            type: "array",
           },
           validateTargetSuffix: {
-            type: 'object',
-          }
+            type: "object",
+          },
         },
       },
     ],
     fixable: "code",
     messages: {
-      notAllowImport: "インポート不可能なファイルです。"
-    }
+      notAllowImport: "インポート不可能なファイルです。",
+    },
   },
-  defaultOptions:[{importAllowSettingList: [], targetFileSuffix: ["js","ts"]}],
+  defaultOptions: [
+    { importAllowSettingList: [], targetFileSuffix: ["js", "ts"] },
+  ],
   create: (context) => {
+    const { importAllowSettingList, targetFileSuffix } = context.options[0];
+    const isTargetFile = (filePath: string) =>
+      targetFileSuffix
+        .map((suffix) => (suffix.startsWith(".") ? suffix : `.${suffix}`))
+        .some((suffix) => filePath.endsWith(suffix));
 
-    const {importAllowSettingList, targetFileSuffix} = context.options[0];
-    const isTargetFile = (filePath:string) => targetFileSuffix
-      .map(suffix => suffix.startsWith(".") ? suffix : `.${suffix}`)
-      .some(suffix => filePath.endsWith(suffix))
-
-    if(!isTargetFile(context.getFilename())) {
-      return {}
+    if (!isTargetFile(context.getFilename())) {
+      return {};
     }
 
     const fileName = getFilePathFromProjectRoot(context);
-    const setting = importAllowSettingList.find(({pathPattern}) => matchFilePath(fileName, pathPattern));
+    const setting = importAllowSettingList.find(({ pathPattern }) =>
+      matchFilePath(fileName, pathPattern)
+    );
 
-    if(!setting) {
-      return {}
+    if (!setting) {
+      return {};
     }
 
     const validateImportPath = (node: TSESTree.ImportDeclaration) => {
-      if(isTargetFile(node.source.value)) {
-        const importPath = path.resolve(path.dirname(fileName), node.source.value);
-        const valid = setting.importAllowPathList.some(p => matchFilePath(importPath, p));
-        if(!valid){
+      if (isTargetFile(node.source.value)) {
+        const importPath = path.resolve(
+          path.dirname(fileName),
+          node.source.value
+        );
+        const valid = setting.importAllowPathList.some((p) =>
+          matchFilePath(importPath, p)
+        );
+        if (!valid) {
           context.report({
             messageId: "notAllowImport",
             node,
             loc: node.loc,
-          })
+          });
         }
       }
-    }
+    };
 
     return {
       ImportDeclaration: validateImportPath,
-    }
-  }
-})
+    };
+  },
+});
