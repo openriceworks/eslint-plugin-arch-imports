@@ -8,7 +8,8 @@
   ],
   "scripts": {
     "build": "tsc",
-    "lint": "eslint --fix lib/**/*.ts & prettier --write lib",
+    "lint": "eslint --fix lib/**/*.ts",
+    "format": "prettier --write lib",
     "test": "jest",
     "postinstall": "npm run build"
   },
