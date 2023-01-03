@@ -17,10 +17,20 @@ module.exports = {
     },
     "plugins": [
         "react",
-        "@typescript-eslint"
+        "@typescript-eslint",
+        "arch-imports"
     ],
     "rules": {
         "react/react-in-jsx-scope": "off",
+        "arch-imports/arch-imports": [
+            "error",
+            {
+                importAllowSettingList: [
+
+                ],
+                targetFileSuffix: ["", "ts", "tsx"]
+            }
+        ]
     },
     "settings": {
         "react": {
