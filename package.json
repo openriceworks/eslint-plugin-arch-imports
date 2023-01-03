@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "workspaces": [
-    "packages/eslint-plugin-arch-imports"
+    "packages/eslint-plugin-arch-imports",
+    "packages/react_sample"
   ]
 }
