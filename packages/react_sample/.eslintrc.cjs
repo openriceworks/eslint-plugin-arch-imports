@@ -26,7 +26,19 @@ module.exports = {
             "error",
             {
                 importAllowSettingList: [
-
+                    {
+                        pathPattern: /src\/components\/.+/,
+                        importAllowPathList: [
+                            /src\/components\/.+/,
+                            /src\/hooks\/.+/
+                        ]
+                    },
+                    {
+                        pathPattern: /src\/hooks\/.+/,
+                        importAllowPathList: [
+                            /src\/hooks\/.+/
+                        ]
+                    }
                 ],
                 targetFileSuffix: ["", "ts", "tsx"]
             }

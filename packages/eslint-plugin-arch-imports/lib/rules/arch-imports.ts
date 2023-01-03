@@ -1,6 +1,7 @@
 import { TSESTree } from "@typescript-eslint/utils";
-import { createRule, getFilePathFromProjectRoot } from "../utils/eslint";
+import { createRule } from "../utils/eslint";
 import path from "path";
+import { getFilePathFromProjectRoot } from "../utils";
 
 type ArchImportsOptions = [
   {
@@ -51,17 +52,22 @@ export default createRule<ArchImportsOptions, MessageIds>({
     { importAllowSettingList: [], targetFileSuffix: ["js", "ts"] },
   ],
   create: (context) => {
+
+    if(!context.getCwd) {
+      return {}
+    }
+
     const { importAllowSettingList, targetFileSuffix } = context.options[0];
-    const isTargetFile = (filePath: string) =>
+    const isTargetFile = (filePath: string) => 
       targetFileSuffix
-        .map((suffix) => (suffix.startsWith(".") ? suffix : `.${suffix}`))
+        .map((suffix) => ((suffix.length === 0 || suffix.startsWith(".")) ? suffix : `.${suffix}`))
         .some((suffix) => filePath.endsWith(suffix));
 
     if (!isTargetFile(context.getFilename())) {
       return {};
     }
 
-    const fileName = getFilePathFromProjectRoot(context);
+    const fileName = getFilePathFromProjectRoot(context.getFilename(), context.getCwd());
     const setting = importAllowSettingList.find(({ pathPattern }) =>
       matchFilePath(fileName, pathPattern)
     );
