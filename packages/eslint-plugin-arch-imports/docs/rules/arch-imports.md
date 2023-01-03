@@ -65,5 +65,5 @@ import useHook from '../hooks/use-hook.ts';
 
 ## Implementation
 
-- [Rule source](../../src/rules/arch-imports.ts)
-- [Test source](../../src/test/rules/arch-imports.test.ts)
+- [Rule source](../../lib/rules/arch-imports.ts)
+- [Test source](../../lib/test/rules/arch-imports.test.ts)

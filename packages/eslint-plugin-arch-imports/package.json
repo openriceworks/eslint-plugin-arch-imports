@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "lint": "eslint --fix src/**/*.ts & prettier --write src",
+    "lint": "eslint --fix lib/**/*.ts & prettier --write lib",
     "test": "jest"
   },
   "author": "",
