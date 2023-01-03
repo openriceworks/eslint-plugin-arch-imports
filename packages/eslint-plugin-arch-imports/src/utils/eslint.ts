@@ -6,7 +6,7 @@ export const createRule = ESLintUtils.RuleCreator((ruleName) => {
 });
 
 export const getFilePathFromProjectRoot = (
-  context: Pick<RuleContext<string, unknown[]>, "getCwd" | "getFilename">
+  context: RuleContext<string, unknown[]>
 ) => {
   if (context.getCwd) {
     return context.getFilename().replace(context.getCwd() + "/", "");
