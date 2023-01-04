@@ -6,6 +6,7 @@
   "files":[
     "dist"
   ],
+  "repository": "openriceworks/eslint-plugin-arch-imports",
   "scripts": {
     "build": "tsc",
     "lint": "eslint --fix lib/**/*.ts",
@@ -13,8 +14,11 @@
     "test": "jest",
     "postinstall": "npm run build"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "openriceworks",
+  "keywords": [
+    "eslint"
+  ],
+  "license": "MIT",
   "devDependencies": {
     "@types/node": "^18.11.18",
     "@typescript-eslint/eslint-plugin": "^5.48.0",

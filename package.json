@@ -6,8 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "openriceworks",
+  "license": "MIT",
   "workspaces": [
     "packages/eslint-plugin-arch-imports",
     "packages/react_sample"
