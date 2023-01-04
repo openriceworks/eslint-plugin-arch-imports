@@ -4,7 +4,7 @@
   "description": "TODO",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "publish:arch-imports": "npm -w packages/eslint-plugin-arch-imports publish"
   },
   "author": "openriceworks",
   "license": "MIT",
