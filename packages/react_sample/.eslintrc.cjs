@@ -25,22 +25,22 @@ module.exports = {
         "arch-imports/arch-imports": [
             "error",
             {
-                importAllowSettingList: [
+                fileExtList: ["", "ts", "tsx"],
+                ruleList: [
                     {
-                        pathPattern: /src\/components\/.+/,
-                        importAllowPathList: [
+                        filePath: /src\/components\/.+/,
+                        allowPathList: [
                             /src\/components\/.+/,
                             /src\/hooks\/.+/
                         ]
                     },
                     {
-                        pathPattern: /src\/hooks\/.+/,
-                        importAllowPathList: [
+                        filePath: /src\/hooks\/.+/,
+                        allowPathList: [
                             /src\/hooks\/.+/
                         ]
                     }
-                ],
-                targetFileSuffix: ["", "ts", "tsx"]
+                ]
             }
         ]
     },

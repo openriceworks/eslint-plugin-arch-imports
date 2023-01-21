@@ -6,14 +6,14 @@ import { matchFilePath } from "../utils";
 
 type ArchImportsOptions = [
   {
-    importAllowSettingList: ImportAllowSetting[];
-    targetFileSuffix: string[];
+    fileExtList: string[];
+    ruleList: ImportRule[];
   }
 ];
 
-type ImportAllowSetting = {
-  pathPattern: string | RegExp;
-  importAllowPathList: (string | RegExp)[];
+type ImportRule = {
+  filePath: string | RegExp;
+  allowPathList: (string | RegExp)[];
 };
 
 type MessageIds = "notAllowImport";
@@ -24,7 +24,7 @@ type MessageIds = "notAllowImport";
  * @returns
  */
 const createIsTargetExtFunc = (options: ArchImportsOptions) => {
-  const targetExtList = options[0].targetFileSuffix.map((suffix) =>
+  const targetExtList = options[0].fileExtList.map((suffix) =>
     suffix.startsWith(".") || suffix === "" ? suffix : `.${suffix}`
   );
 
@@ -52,11 +52,11 @@ const createValidateImportFunc = (
 
   // プロジェクトルートからの相対パスに変換
   const fileName = context.getFilename().replace(context.getCwd() + "/", "");
-  const setting = context.options[0].importAllowSettingList.find(
-    ({ pathPattern }) => matchFilePath(fileName, pathPattern)
+  const rule = context.options[0].ruleList.find(({ filePath }) =>
+    matchFilePath(fileName, filePath)
   );
 
-  if (setting == null) {
+  if (rule == null) {
     return undefined;
   }
 
@@ -67,9 +67,7 @@ const createValidateImportFunc = (
         path.dirname(fileName),
         node.source.value
       );
-      if (
-        !setting.importAllowPathList.some((p) => matchFilePath(importPath, p))
-      ) {
+      if (!rule.allowPathList.some((p) => matchFilePath(importPath, p))) {
         // import可能リストにいないのでエラー
         context.report({
           messageId: "notAllowImport",
@@ -95,11 +93,11 @@ export default createRule<ArchImportsOptions, MessageIds>({
       {
         type: "object",
         properties: {
-          importAllowSettingList: {
+          fileExtList: {
             type: "array",
           },
-          validateTargetSuffix: {
-            type: "object",
+          ruleList: {
+            type: "array",
           },
         },
       },
@@ -109,9 +107,7 @@ export default createRule<ArchImportsOptions, MessageIds>({
       notAllowImport: "インポート不可能なファイルです。",
     },
   },
-  defaultOptions: [
-    { importAllowSettingList: [], targetFileSuffix: ["js", "ts"] },
-  ],
+  defaultOptions: [{ fileExtList: ["js", "ts"], ruleList: [], }],
   create: (context) => {
     const importRuleFunction = createValidateImportFunc(context);
     return importRuleFunction != null

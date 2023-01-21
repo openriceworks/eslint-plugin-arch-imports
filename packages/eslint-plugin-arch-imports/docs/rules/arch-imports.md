@@ -9,15 +9,15 @@ Examples of **incorrect** code:
 ```typescript
 // set options
 // {
-//   importAllowSettingList: [
+//   ruleList: [
 //     {
-//       pathPattern: /src\/hooks\/.+/,
-//       importAllowPathList: [
+//       filePath: /src\/hooks\/.+/,
+//       allowPathList: [
 //         /src\/hooks\/.+/
 //       ]
 //     }
 //   ],
-//   targetFileSuffix: ["", "js", "jsx", "ts", "tsx"],
+//   fileExtList: ["", "js", "jsx", "ts", "tsx"],
 // }
 
 // this file is src/hooks/use-hook.ts
@@ -30,15 +30,15 @@ Examples of **correct** code:
 // set options
 // options: [
 //   {
-//     importAllowSettingList: [
+//     ruleList: [
 //       {
-//         pathPattern: /src\/components\/.+/,
-//         importAllowPathList: [
+//         filePath: /src\/components\/.+/,
+//         allowPathList: [
 //           /src\/hooks\/.+/
 //         ]
 //       }
 //     ],
-//     targetFileSuffix: ["", "js", "jsx", "ts", "tsx"],
+//     fileExtList: ["", "js", "jsx", "ts", "tsx"],
 //   }
 // ]
 // },
@@ -54,11 +54,11 @@ import useHook from '../hooks/use-hook.ts';
   [
     "off" | "warn" | "error",
     {
-      importAllowSettingList: {
-          pathPattern: string|RegExp;
-          importAllowPathList: (string|RegExp)[];
+      ruleList: {
+          filePath: string|RegExp;
+          allowPathList: (string|RegExp)[];
         }[],
-      targetFileSuffix: string[],
+      fileExtList: string[],
     }
   ]
 ```
