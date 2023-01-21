@@ -56,7 +56,7 @@ const createValidateImportFunc = (
     ({ pathPattern }) => matchFilePath(fileName, pathPattern)
   );
 
-  if (setting == null || setting.importAllowPathList.length === 0) {
+  if (setting == null) {
     return undefined;
   }
 
