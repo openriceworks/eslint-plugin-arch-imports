@@ -3,62 +3,10 @@ import { createRule } from "../utils/eslint";
 import path from "path";
 import { RuleContext } from "@typescript-eslint/utils/dist/ts-eslint";
 import { matchFilePath } from "../utils";
-
-type ArchImportsOptions = [
-  {
-    fileExtList: string[];
-    ruleList: ImportRule[];
-  }
-];
-
-type ImportRule = {
-  filePath: string | RegExp;
-  allowPathList: (string | RegExp)[];
-};
+import { ArchImportsOptions } from "../types";
+import { isArchImportOptions } from "../utils/types-check";
 
 type MessageIds = "notAllowImport";
-
-const isStringOrRexExp = (data: unknown): data is string | RegExp =>
-  typeof data === "string" || data instanceof RegExp;
-
-const isImportRule = (data: unknown): data is ImportRule => {
-  if (typeof data !== "object" || data == null) {
-    return false;
-  }
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  const { filePath, allowPathList } = data;
-  if (!isStringOrRexExp(filePath)) {
-    return false;
-  }
-  if (!Array.isArray(allowPathList) || !allowPathList.every(isStringOrRexExp)) {
-    return false;
-  }
-
-  return true;
-};
-
-const isArchImportOptions = (
-  options: unknown
-): options is ArchImportsOptions => {
-  if (!Array.isArray(options) || options.length !== 1) {
-    return false;
-  }
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  const { fileExtList, ruleList } = options[0];
-  if (
-    !Array.isArray(fileExtList) ||
-    !fileExtList.every((fileExtList) => typeof fileExtList === "string")
-  ) {
-    return false;
-  }
-  if (!Array.isArray(ruleList) || !ruleList.every(isImportRule)) {
-    return false;
-  }
-
-  return true;
-};
 
 /**
  * validate対象の拡張子か判定するメソッドを生成
