@@ -18,6 +18,48 @@ type ImportRule = {
 
 type MessageIds = "notAllowImport";
 
+const isStringOrRexExp = (data: unknown): data is string | RegExp =>
+  typeof data === "string" || data instanceof RegExp;
+
+const isImportRule = (data: unknown): data is ImportRule => {
+  if (typeof data !== "object" || data == null) {
+    return false;
+  }
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  const { filePath, allowPathList } = data;
+  if (!isStringOrRexExp(filePath)) {
+    return false;
+  }
+  if (!Array.isArray(allowPathList) || !allowPathList.every(isStringOrRexExp)) {
+    return false;
+  }
+
+  return true;
+};
+
+const isArchImportOptions = (
+  options: unknown
+): options is ArchImportsOptions => {
+  if (!Array.isArray(options) || options.length !== 1) {
+    return false;
+  }
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  const { fileExtList, ruleList } = options[0];
+  if (
+    !Array.isArray(fileExtList) ||
+    !fileExtList.every((fileExtList) => typeof fileExtList === "string")
+  ) {
+    return false;
+  }
+  if (!Array.isArray(ruleList) || !ruleList.every(isImportRule)) {
+    return false;
+  }
+
+  return true;
+};
+
 /**
  * validate対象の拡張子か判定するメソッドを生成
  * @param options
@@ -107,8 +149,12 @@ export default createRule<ArchImportsOptions, MessageIds>({
       notAllowImport: "インポート不可能なファイルです。",
     },
   },
-  defaultOptions: [{ fileExtList: ["js", "ts"], ruleList: [], }],
+  defaultOptions: [{ fileExtList: ["js", "ts"], ruleList: [] }],
   create: (context) => {
+    // context.optionsの型と実態が合わないので型チェックを行う
+    if (!isArchImportOptions(context.options)) {
+      throw Error("arch-imports/arch-imports options is invalid.");
+    }
     const importRuleFunction = createValidateImportFunc(context);
     return importRuleFunction != null
       ? {
