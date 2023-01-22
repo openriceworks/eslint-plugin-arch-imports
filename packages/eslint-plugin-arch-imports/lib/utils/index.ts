@@ -1,3 +1,4 @@
-export const getFilePathFromProjectRoot = (filePath: string, cwd: string) => {
-  return filePath.replace(cwd + "/", "");
-};
+export const matchFilePath = (fileName: string, filePath: string | RegExp) =>
+  typeof filePath === "string"
+    ? filePath === fileName
+    : filePath.test(fileName);

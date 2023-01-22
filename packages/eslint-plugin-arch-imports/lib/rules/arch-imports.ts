@@ -1,26 +1,75 @@
 import { TSESTree } from "@typescript-eslint/utils";
 import { createRule } from "../utils/eslint";
 import path from "path";
-import { getFilePathFromProjectRoot } from "../utils";
-
-type ArchImportsOptions = [
-  {
-    importAllowSettingList: ImportAllowSetting[];
-    targetFileSuffix: string[];
-  }
-];
-
-type ImportAllowSetting = {
-  pathPattern: string | RegExp;
-  importAllowPathList: (string | RegExp)[];
-};
-
-const matchFilePath = (fileName: string, pathPattern: string | RegExp) =>
-  typeof pathPattern === "string"
-    ? pathPattern === fileName
-    : pathPattern.test(fileName);
+import { RuleContext } from "@typescript-eslint/utils/dist/ts-eslint";
+import { matchFilePath } from "../utils";
+import { ArchImportsOptions } from "../types";
+import { isArchImportOptions } from "../utils/types-check";
 
 type MessageIds = "notAllowImport";
+
+/**
+ * validate対象の拡張子か判定するメソッドを生成
+ * @param options
+ * @returns
+ */
+const createIsTargetExtFunc = (options: ArchImportsOptions) => {
+  const targetExtList = options[0].fileExtList.map((suffix) =>
+    suffix.startsWith(".") || suffix === "" ? suffix : `.${suffix}`
+  );
+
+  const isTargetExt = (filePath: string) =>
+    targetExtList.includes(path.extname(filePath));
+  return isTargetExt;
+};
+
+/**
+ * importの可否を判定するメソッドを生成
+ * @param context
+ * @returns importの可否を判定するメソッド (生成できなければundefined)
+ */
+const createValidateImportFunc = (
+  context: Readonly<RuleContext<MessageIds, ArchImportsOptions>>
+) => {
+  if (!context.getCwd) {
+    return undefined;
+  }
+
+  const isTargetExt = createIsTargetExtFunc(context.options);
+  if (!isTargetExt(context.getFilename())) {
+    return undefined;
+  }
+
+  // プロジェクトルートからの相対パスに変換
+  const fileName = context.getFilename().replace(context.getCwd() + "/", "");
+  const rule = context.options[0].ruleList.find(({ filePath }) =>
+    matchFilePath(fileName, filePath)
+  );
+
+  if (rule == null) {
+    return undefined;
+  }
+
+  const validateImportPath = (node: TSESTree.ImportDeclaration) => {
+    if (isTargetExt(node.source.value)) {
+      // プロジェクトルートからの相対パスに変換
+      const importPath = path.resolve(
+        path.dirname(fileName),
+        node.source.value
+      );
+      if (!rule.allowPathList.some((p) => matchFilePath(importPath, p))) {
+        // import可能リストにいないのでエラー
+        context.report({
+          messageId: "notAllowImport",
+          node,
+          loc: node.loc,
+        });
+      }
+    }
+  };
+
+  return validateImportPath;
+};
 
 export default createRule<ArchImportsOptions, MessageIds>({
   name: "arch-imports",
@@ -34,11 +83,11 @@ export default createRule<ArchImportsOptions, MessageIds>({
       {
         type: "object",
         properties: {
-          importAllowSettingList: {
+          fileExtList: {
             type: "array",
           },
-          validateTargetSuffix: {
-            type: "object",
+          ruleList: {
+            type: "array",
           },
         },
       },
@@ -48,59 +97,17 @@ export default createRule<ArchImportsOptions, MessageIds>({
       notAllowImport: "インポート不可能なファイルです。",
     },
   },
-  defaultOptions: [
-    { importAllowSettingList: [], targetFileSuffix: ["js", "ts"] },
-  ],
+  defaultOptions: [{ fileExtList: ["js", "ts"], ruleList: [] }],
   create: (context) => {
-    if (!context.getCwd) {
-      return {};
+    // context.optionsの型と実態が合わないので型チェックを行う
+    if (!isArchImportOptions(context.options)) {
+      throw Error("arch-imports/arch-imports options is invalid.");
     }
-
-    const { importAllowSettingList, targetFileSuffix } = context.options[0];
-    const isTargetFile = (filePath: string) =>
-      targetFileSuffix
-        .map((suffix) =>
-          suffix.length === 0 || suffix.startsWith(".") ? suffix : `.${suffix}`
-        )
-        .some((suffix) => filePath.endsWith(suffix));
-
-    if (!isTargetFile(context.getFilename())) {
-      return {};
-    }
-
-    const fileName = getFilePathFromProjectRoot(
-      context.getFilename(),
-      context.getCwd()
-    );
-    const setting = importAllowSettingList.find(({ pathPattern }) =>
-      matchFilePath(fileName, pathPattern)
-    );
-
-    if (!setting) {
-      return {};
-    }
-
-    const validateImportPath = (node: TSESTree.ImportDeclaration) => {
-      if (isTargetFile(node.source.value)) {
-        const importPath = path.resolve(
-          path.dirname(fileName),
-          node.source.value
-        );
-        const valid = setting.importAllowPathList.some((p) =>
-          matchFilePath(importPath, p)
-        );
-        if (!valid) {
-          context.report({
-            messageId: "notAllowImport",
-            node,
-            loc: node.loc,
-          });
+    const importRuleFunction = createValidateImportFunc(context);
+    return importRuleFunction != null
+      ? {
+          ImportDeclaration: importRuleFunction,
         }
-      }
-    };
-
-    return {
-      ImportDeclaration: validateImportPath,
-    };
+      : {};
   },
 });
