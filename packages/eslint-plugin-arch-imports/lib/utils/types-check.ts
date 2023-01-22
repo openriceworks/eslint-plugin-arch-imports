@@ -1,6 +1,6 @@
 import { ArchImportsOptions, ImportRule } from "../types";
 
-export const isStringOrRexExp = (data: unknown): data is string | RegExp =>
+export const isStringOrRegExp = (data: unknown): data is string | RegExp =>
   typeof data === "string" || data instanceof RegExp;
 
 export const isImportRule = (data: unknown): data is ImportRule => {
@@ -10,10 +10,10 @@ export const isImportRule = (data: unknown): data is ImportRule => {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   const { filePath, allowPathList } = data;
-  if (!isStringOrRexExp(filePath)) {
+  if (!isStringOrRegExp(filePath)) {
     return false;
   }
-  if (!Array.isArray(allowPathList) || !allowPathList.every(isStringOrRexExp)) {
+  if (!Array.isArray(allowPathList) || !allowPathList.every(isStringOrRegExp)) {
     return false;
   }
 
